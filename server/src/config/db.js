@@ -32,4 +32,13 @@ export async function connectDB() {
   } finally {
     connecting = null;
   }
+
+
+  mongoose.connection.on("connected", () => {
+  console.log("✅ MongoDB Connected");
+});
+
+mongoose.connection.on("error", (err) => {
+  console.log("❌ MongoDB Error:", err.message);
+});
 }
