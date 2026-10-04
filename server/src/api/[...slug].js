@@ -1,4 +1,4 @@
-// Vercel serverless entry - saari /api/* requests yahin aati hain
+// Vercel catch-all serverless entry - /api/* ki saari requests yahin aati hain
 import { connectDB } from '../src/config/db.js';
 import app from '../src/app.js';
 
