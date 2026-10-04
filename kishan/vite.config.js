@@ -1,0 +1,12 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  server: {
+    port: 5173,
+    // dev me /api calls server (port 5000) ko forward hoti hain
+    proxy: { '/api': { target: 'http://localhost:5000', changeOrigin: true } },
+  },
+});
