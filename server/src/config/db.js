@@ -17,15 +17,19 @@ export async function connectDB() {
   const uri = process.env.MONGO_URI;
   if (!uri) throw new Error('MONGO_URI .env me set nahi hai');
   if (mongoose.connection.readyState === 1) return;
-  if (!connecting) {
-    mongoose.set('strictQuery', true);
-    connecting = mongoose
-      .connect(uri, { serverSelectionTimeoutMS: 8000 })
-      .then(() => console.log(`MongoDB connected: ${mongoose.connection.host}/${mongoose.connection.name}`))
-      .catch((e) => {
-        connecting = null; // agli request dobara try kare
-        throw e;
-      });
+  // Concurrent requests ek hi in-progress connection ko await karein. Promise ko
+  // connect hone ke baad retain nahi karte, warna baad me connection drop hone par
+  // Mongoose reconnect kiye bina queries buffer karta rahega.
+  if (connecting) return connecting;
+
+  mongoose.set('strictQuery', true);
+  connecting = mongoose
+    .connect(uri, { serverSelectionTimeoutMS: 8000 })
+    .then(() => console.log(`MongoDB connected: ${mongoose.connection.host}/${mongoose.connection.name}`));
+
+  try {
+    await connecting;
+  } finally {
+    connecting = null;
   }
-  await connecting;
 }
