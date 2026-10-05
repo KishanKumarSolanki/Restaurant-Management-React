@@ -13,6 +13,7 @@ import * as shifts from '../controllers/shift.controller.js';
 import * as assignment from '../controllers/assignment.controller.js';
 import { dashboard } from '../controllers/dashboard.controller.js';
 import { reports } from '../controllers/report.controller.js';
+import { home, search } from '../controllers/home.controller.js';
 
 const router = Router();
 
@@ -32,6 +33,8 @@ router.patch('/profile', validate(v.profileSchema), auth.updateProfile);
 router.put('/profile/password', validate(v.passwordUpdateSchema), auth.updatePassword);
 router.delete('/profile', validate(v.deleteAccountSchema), auth.deleteAccount);
 
+router.get('/home', home);
+router.get('/search', search);
 router.get('/dashboard', dashboard);
 router.get('/reports', reports);
 
