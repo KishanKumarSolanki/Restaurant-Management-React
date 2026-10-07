@@ -27,7 +27,10 @@ export default function Landing() {
           <h1 className="mb-3 text-4xl font-bold md:text-5xl">Welcome to Cafe Express</h1>
           <p className="mb-4 text-xl">Your Complete Restaurant Management Solution</p>
           <p className="mb-8 text-white/80">Streamline every aspect of your restaurant operations with our intuitive system that puts you in complete control.</p>
-          <a href="#features" className="btn btn-primary px-7 py-3"><ArrowDown size={16} /> Explore Features</a>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link to="/order" className="btn btn-primary px-7 py-3">View Menu &amp; Order</Link>
+            <a href="#features" className="btn btn-primary px-7 py-3"><ArrowDown size={16} /> Explore Features</a>
+          </div>
         </div>
       </section>
 
