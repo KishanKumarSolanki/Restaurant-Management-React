@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ClipboardList, PlusCircle, Pencil, Trash2 } from 'lucide-react';
+import { CheckCircle2, ClipboardList, PlusCircle, Pencil, Trash2 } from 'lucide-react';
 import PageHeader from '../../components/PageHeader.jsx';
 import Pagination from '../../components/Pagination.jsx';
 import ConfirmModal from '../../components/ConfirmModal.jsx';
@@ -7,11 +8,32 @@ import DataState, { EmptyState } from '../../components/DataState.jsx';
 import Badge from '../../components/Badge.jsx';
 import { useCrudList } from '../../hooks/useCrudList.js';
 import { useCart } from '../../context/CartContext.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
+import { useToast } from '../../context/ToastContext.jsx';
+import api, { errorMessage } from '../../api/client.js';
 import { money } from '../../utils/format.js';
 
 export default function OrderList() {
   const l = useCrudList('/orders');
   const cart = useCart();
+  const { user } = useAuth();
+  const toast = useToast();
+  const [approving, setApproving] = useState('');
+  const isAdmin = user?.role?.toLowerCase() === 'admin';
+
+  const approve = async (order) => {
+    setApproving(order.id);
+    try {
+      toast.success((await api.patch(`/orders/${order.id}/approve`)).data.message);
+      await l.reload();
+      cart.refresh();
+    } catch (error) {
+      toast.error(errorMessage(error));
+    } finally {
+      setApproving('');
+    }
+  };
+
   return (
     <>
       <PageHeader title="Order List" crumbs={[{ label: 'Orders' }]} actions={<Link to="/orders/new" className="btn btn-primary btn-sm"><PlusCircle size={14} /> Create Order</Link>} />
@@ -41,6 +63,11 @@ export default function OrderList() {
                         <td><Badge value={o.status} /></td>
                         <td>
                           <div className="flex justify-end gap-1">
+                            {isAdmin && o.fulfillmentStatus === 'served' && o.status !== 'completed' && (
+                              <button className="btn btn-primary btn-sm" disabled={approving === o.id} onClick={() => approve(o)} title="Approve and complete order">
+                                <CheckCircle2 size={14} /> {approving === o.id ? 'Approving...' : 'Complete'}
+                              </button>
+                            )}
                             <Link to={`/orders/${o.id}/edit`} className="icon-btn border-primary text-primary hover:bg-primary hover:text-white" title="Edit"><Pencil size={15} /></Link>
                             <button onClick={() => l.setToDelete(o)} className="icon-btn border-red-500 text-red-600 hover:bg-red-600 hover:text-white" title="Delete"><Trash2 size={15} /></button>
                           </div>
