@@ -61,6 +61,7 @@ Dev me `/api` calls apne aap `localhost:5000` pe jaati hain. Production me `kish
 Lists me `?page=1&limit=10`, dropdowns ke liye `?all=true`.
 
 Landing page ka QR `/order` par available menu kholta hai. Customer menu mein sirf available items aate hain; production deployment par backend `CLIENT_URL` mein frontend origin aur frontend `VITE_API_URL` mein backend ka poora `/api` URL set karein.
+- Admin `/staff/assign` se order staff ko assign karta hai. Assigned staff `/staff/my-orders` mein order ko `Ready` phir `Served` mark karta hai; order `Completed` tabhi hota hai jab admin assignment page se approval de.
 
 ## Dhyan rakho
 - Purana MySQL/SQLite data apne aap migrate nahi hota. Naya MongoDB khali start hota hai.

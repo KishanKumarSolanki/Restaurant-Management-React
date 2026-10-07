@@ -27,6 +27,7 @@ import StaffForm from './pages/staff/StaffForm.jsx';
 import ShiftList from './pages/staff/ShiftList.jsx';
 import ShiftForm from './pages/staff/ShiftForm.jsx';
 import AssignOrders from './pages/staff/AssignOrders.jsx';
+import MyOrders from './pages/staff/MyOrders.jsx';
 
 export default function App() {
   return (
@@ -73,6 +74,7 @@ export default function App() {
           <Route path="/staff-shifts/new" element={<ShiftForm />} />
           <Route path="/staff-shifts/:id/edit" element={<ShiftForm />} />
           <Route path="/staff/assign" element={<AssignOrders />} />
+          <Route path="/staff/my-orders" element={<MyOrders />} />
         </Route>
       </Route>
 

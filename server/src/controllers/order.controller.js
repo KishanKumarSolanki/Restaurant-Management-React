@@ -67,6 +67,7 @@ export const getOne = asyncHandler(async (req, res) => res.json({ order: await f
 
 export const create = asyncHandler(async (req, res) => {
   const { ordername, customerno, status, notes } = req.body;
+  if (status === 'completed') throw new ApiError(422, 'Orders can only be completed after admin approval.');
   await assertCustomer(customerno);
   const prepared = await prepareItems(req.body.items);
   const seq = await nextSequence('bill');
@@ -82,12 +83,31 @@ export const create = asyncHandler(async (req, res) => {
 export const update = asyncHandler(async (req, res) => {
   const order = await findOr404(req.params.id);
   const { ordername, customerno, status, notes } = req.body;
+  if (status === 'completed' && order.status !== 'completed') {
+    throw new ApiError(422, 'Orders can only be completed after admin approval.');
+  }
   await assertCustomer(customerno);
   const prepared = await prepareItems(req.body.items);
 
   order.set({ ordername, customerno, status, notes, ...prepared });
   await order.save();
   res.json({ order, message: 'Order updated successfully.' });
+});
+
+export const approveCompletion = asyncHandler(async (req, res) => {
+  const order = await findOr404(req.params.id);
+  if (!['pending', 'processing'].includes(order.status)) {
+    throw new ApiError(422, 'Only active orders can be approved.');
+  }
+  if (order.fulfillmentStatus !== 'served') {
+    throw new ApiError(422, 'The assigned staff must mark this order served before approval.');
+  }
+
+  order.status = 'completed';
+  order.approvedAt = new Date();
+  order.approvedBy = req.user.id;
+  await order.save();
+  res.json({ order, message: `Order ${order.ordername} approved and completed.` });
 });
 
 export const savePayment = asyncHandler(async (req, res) => {

@@ -49,7 +49,8 @@ export default function OrderForm() {
                 {(customers?.data || []).map((c) => <option key={c.id} value={c.customerno}>{c.name} ({c.customerno})</option>)}
               </Select>
               <Select label="Order Status" name="status" value={f.form.status} onChange={f.set} error={f.errors.status}>
-                {['pending', 'processing', 'completed', 'cancelled'].map((s) => <option key={s} value={s}>{cap(s)}</option>)}
+                {['pending', 'processing', 'cancelled'].map((s) => <option key={s} value={s}>{cap(s)}</option>)}
+                {f.form.status === 'completed' && <option value="completed" disabled>Completed (admin approved)</option>}
               </Select>
               <div className="rounded-xl bg-gray-50 p-4">
                 <p className="text-xs uppercase text-gray-500">Live Summary</p>

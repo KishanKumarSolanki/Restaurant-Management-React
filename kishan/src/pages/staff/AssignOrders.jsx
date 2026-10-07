@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ClipboardCheck } from 'lucide-react';
+import { CheckCircle2, ClipboardCheck } from 'lucide-react';
 import PageHeader from '../../components/PageHeader.jsx';
 import DataState from '../../components/DataState.jsx';
 import Badge from '../../components/Badge.jsx';
@@ -12,9 +12,10 @@ import { money, timeAgo } from '../../utils/format.js';
 export default function AssignOrders() {
   const { data, loading, error, reload } = useFetch('/staff-assignments');
   const toast = useToast();
-  const [form, setForm] = useState({ order: '', assignedTo: '', status: 'processing', assignmentNotes: '' });
+  const [form, setForm] = useState({ order: '', assignedTo: '', assignmentNotes: '' });
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
+  const [approving, setApproving] = useState('');
   const set = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const submit = async (e) => {
@@ -23,13 +24,25 @@ export default function AssignOrders() {
     setErrors({});
     try {
       toast.success((await api.post('/staff-assignments', form)).data.message);
-      setForm({ order: '', assignedTo: '', status: 'processing', assignmentNotes: '' });
+      setForm({ order: '', assignedTo: '', assignmentNotes: '' });
       reload();
     } catch (err) {
       setErrors(fieldErrors(err));
       toast.error(errorMessage(err));
     } finally {
       setBusy(false);
+    }
+  };
+
+  const approve = async (order) => {
+    setApproving(order.id);
+    try {
+      toast.success((await api.patch(`/orders/${order.id}/approve`)).data.message);
+      reload();
+    } catch (err) {
+      toast.error(errorMessage(err));
+    } finally {
+      setApproving('');
     }
   };
 
@@ -56,9 +69,6 @@ export default function AssignOrders() {
                   <option value="">Select staff</option>
                   {data.staffMembers.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.role})</option>)}
                 </Select>
-                <Select label="Order Status" name="status" value={form.status} onChange={set} error={errors.status}>
-                  <option value="pending">Pending</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option>
-                </Select>
                 <Textarea label="Notes" name="assignmentNotes" value={form.assignmentNotes} onChange={set} error={errors.assignmentNotes} />
                 <button className="btn btn-primary w-full" disabled={busy}>{busy ? 'Assigning...' : 'Assign Order'}</button>
               </form>
@@ -68,7 +78,7 @@ export default function AssignOrders() {
                 <div className="card-body table-wrap">
                   {data.orders.length === 0 ? <p className="py-6 text-center text-gray-500">No active orders.</p> : (
                     <table className="table">
-                      <thead><tr><th>Order</th><th>Customer</th><th>Amount</th><th>Status</th><th>Assigned To</th></tr></thead>
+                      <thead><tr><th>Order</th><th>Customer</th><th>Amount</th><th>Status</th><th>Kitchen / Service</th><th>Assigned To</th><th>Approval</th></tr></thead>
                       <tbody>
                         {data.orders.map((o) => (
                           <tr key={o.id}>
@@ -76,9 +86,13 @@ export default function AssignOrders() {
                             <td>{o.customerno}</td>
                             <td>{money(o.amount)}</td>
                             <td><Badge value={o.status} /></td>
+                            <td><Badge value={o.fulfillmentStatus || 'preparing'} /></td>
                             <td>{o.assignmentName
                               ? <><div className="text-primary">{o.assignmentName}</div><div className="text-xs text-gray-500">{timeAgo(o.assignedAt)}</div></>
                               : <span className="rounded-full bg-red-50 px-2.5 py-0.5 text-xs text-red-700">Unassigned</span>}</td>
+                            <td>{o.fulfillmentStatus === 'served'
+                              ? <button className="btn btn-primary btn-sm" disabled={approving === o.id} onClick={() => approve(o)}><CheckCircle2 size={14} /> {approving === o.id ? 'Approving...' : 'Approve complete'}</button>
+                              : <span className="text-xs text-gray-500">Available after serving</span>}</td>
                           </tr>
                         ))}
                       </tbody>

@@ -44,6 +44,7 @@ export default function Layout() {
               <NavLink to="/orders" className={link}><Receipt size={16} /> Orders</NavLink>
               <NavLink to="/reports" className={link}><LineChart size={16} /> Reports</NavLink>
               <Dropdown label="Staff" icon={UserCheck} active={pathname.startsWith('/staff')}>
+                <Link to="/staff/my-orders" className={dd}><ClipboardCheck size={15} /> My Assigned Orders</Link>
                 <Link to="/staff-members" className={dd}><Users size={15} /> Staff Members</Link>
                 <Link to="/staff-shifts" className={dd}><CalendarClock size={15} /> Shifts</Link>
                 <Link to="/staff/assign" className={dd}><ClipboardCheck size={15} /> Assign Orders</Link>

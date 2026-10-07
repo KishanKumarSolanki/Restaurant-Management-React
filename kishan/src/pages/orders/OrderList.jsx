@@ -24,7 +24,7 @@ export default function OrderList() {
             ) : (
               <div className="table-wrap">
                 <table className="table">
-                  <thead><tr><th>#</th><th>Order</th><th>Customer No</th><th>Assigned Staff</th><th>Items</th><th>Qty</th><th>Amount</th><th>Status</th><th className="text-right">Actions</th></tr></thead>
+                  <thead><tr><th>#</th><th>Order</th><th>Customer No</th><th>Assigned Staff</th><th>Items</th><th>Qty</th><th>Amount</th><th>Kitchen / Service</th><th>Status</th><th className="text-right">Actions</th></tr></thead>
                   <tbody>
                     {l.rows.map((o, i) => (
                       <tr key={o.id}>
@@ -37,6 +37,7 @@ export default function OrderList() {
                         <td><div className="font-medium">{o.items.length} items</div><div className="max-w-52 truncate text-xs text-gray-500">{o.items.slice(0, 2).map((x) => x.itemName).join(', ') || 'No line items'}</div></td>
                         <td>{o.quantity}</td>
                         <td>{money(o.amount)}</td>
+                        <td><Badge value={o.fulfillmentStatus || 'preparing'} /></td>
                         <td><Badge value={o.status} /></td>
                         <td>
                           <div className="flex justify-end gap-1">

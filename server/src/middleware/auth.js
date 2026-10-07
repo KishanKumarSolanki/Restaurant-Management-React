@@ -21,6 +21,11 @@ export const protect = asyncHandler(async (req, _res, next) => {
   next();
 });
 
+export function requireAdmin(req, _res, next) {
+  if (req.user.role !== 'admin') return next(new ApiError(403, 'Only an admin can manage staff assignments and approve order completion.'));
+  next();
+}
+
 export function signToken(user) {
   return jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
 }

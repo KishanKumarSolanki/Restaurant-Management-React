@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { protect } from '../middleware/auth.js';
+import { protect, requireAdmin } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import * as v from '../validators/index.js';
 
@@ -31,6 +31,8 @@ router.post('/public/orders', validate(v.publicOrderSchema), publicOrders.create
 // ---------- yahan se neeche sab login ke baad ----------
 router.use(protect);
 
+router.get('/staff/orders', assignment.myOrders);
+router.patch('/staff/orders/:id/fulfillment', validate(v.fulfillmentUpdateSchema), assignment.updateFulfillment);
 router.get('/auth/me', auth.me);
 router.patch('/profile', validate(v.profileSchema), auth.updateProfile);
 router.put('/profile/password', validate(v.passwordUpdateSchema), auth.updatePassword);
@@ -54,6 +56,7 @@ router.route('/items/:id').get(items.getOne).put(validate(v.itemSchema), items.u
 router.get('/orders/cart', orders.cart);
 router.get('/orders/cart/count', orders.cartCount);
 router.route('/orders').get(orders.list).post(validate(v.orderSchema), orders.create);
+router.patch('/orders/:id/approve', requireAdmin, orders.approveCompletion);
 router.patch('/orders/:id/payment', validate(v.paymentSchema), orders.savePayment);
 router.route('/orders/:id').get(orders.getOne).put(validate(v.orderSchema), orders.update).delete(orders.remove);
 
@@ -63,7 +66,7 @@ router.route('/staff-members/:id').get(staff.getOne).put(validate(v.staffUpdateS
 router.route('/staff-shifts').get(shifts.list).post(validate(v.shiftSchema), shifts.create);
 router.route('/staff-shifts/:id').get(shifts.getOne).put(validate(v.shiftSchema), shifts.update).delete(shifts.remove);
 
-router.get('/staff-assignments', assignment.overview);
-router.post('/staff-assignments', validate(v.assignmentSchema), assignment.assign);
+router.get('/staff-assignments', requireAdmin, assignment.overview);
+router.post('/staff-assignments', requireAdmin, validate(v.assignmentSchema), assignment.assign);
 
 export default router;

@@ -134,6 +134,9 @@ export const shiftSchema = z
 export const assignmentSchema = z.object({
   order: text(50),
   assignedTo: text(50),
-  status: z.enum(['pending', 'processing', 'completed', 'cancelled']),
   assignmentNotes: optText(500),
+});
+
+export const fulfillmentUpdateSchema = z.object({
+  fulfillmentStatus: z.enum(['ready', 'served']),
 });
