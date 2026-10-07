@@ -3,6 +3,7 @@ import Layout from './components/Layout.jsx';
 import { GuestRoute, ProtectedRoute } from './components/RouteGuards.jsx';
 
 import Landing from './pages/Landing.jsx';
+import CustomerOrder from './pages/CustomerOrder.jsx';
 import Login from './pages/auth/Login.jsx';
 import Register from './pages/auth/Register.jsx';
 import ForgotPassword from './pages/auth/ForgotPassword.jsx';
@@ -31,6 +32,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/order" element={<CustomerOrder />} />
 
       <Route element={<GuestRoute />}>
         <Route path="/login" element={<Login />} />

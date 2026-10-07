@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Utensils, LogIn, UserPlus, Users, ClipboardList, ArrowDown, CheckCircle2 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
+import { Utensils, LogIn, UserPlus, Users, ClipboardList, ArrowDown, CheckCircle2, ScanLine } from 'lucide-react';
 
 const features = [
   { icon: Users, title: 'Customer Management', sub: 'Build loyalty through personalized service', points: ['360° Customer Profiles', 'Order History', 'Preferences & Notes', 'Feedback System'], tip: 'Use the notes field to record allergies or favorite tables.' },
@@ -8,6 +9,7 @@ const features = [
 ];
 
 export default function Landing() {
+  const orderUrl = `${window.location.origin}${import.meta.env.BASE_URL}order`;
   return (
     <div className="min-h-screen">
       <nav className="sticky top-0 z-40 bg-gradient-to-br from-ink to-[#3d3d3d] shadow">
@@ -26,6 +28,13 @@ export default function Landing() {
           <p className="mb-4 text-xl">Your Complete Restaurant Management Solution</p>
           <p className="mb-8 text-white/80">Streamline every aspect of your restaurant operations with our intuitive system that puts you in complete control.</p>
           <a href="#features" className="btn btn-primary px-7 py-3"><ArrowDown size={16} /> Explore Features</a>
+        </div>
+      </section>
+
+      <section className="mx-auto mb-12 max-w-4xl px-4">
+        <div className="card grid items-center gap-6 overflow-hidden p-6 md:grid-cols-[1fr_auto] md:p-8">
+          <div><span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary"><ScanLine size={16} /> QR ordering</span><h2 className="mt-3 text-2xl font-bold">Let customers order from their phone</h2><p className="mt-2 max-w-xl text-gray-600">Scan this code to open the live menu. Submitted items go straight into the restaurant cart as a new unpaid order.</p><Link to="/order" className="btn btn-primary mt-5">Open customer menu</Link></div>
+          <div className="rounded-xl bg-white p-3 shadow-inner"><QRCodeSVG value={orderUrl} size={176} level="M" includeMargin /></div>
         </div>
       </section>
 

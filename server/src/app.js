@@ -6,14 +6,12 @@ import { errorHandler, notFound } from './middleware/error.js';
 
 const app = express();
 
-const allowed = (process.env.CLIENT_URL || 'http://localhost:5173').split(',').map((s) => s.trim());
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173').split(',').map((s) => s.trim());
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin) return callback(null, true);
 
-        const allowed = process.env.CLIENT_URL.split(',');
-
-        if (allowed.includes(origin)) {
+        if (allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));

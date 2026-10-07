@@ -55,9 +55,12 @@ Dev me `/api` calls apne aap `localhost:5000` pe jaati hain. Production me `kish
 
 `POST /auth/register|login|forgot-password|reset-password` (public), `GET /auth/me`,
 `PATCH /profile`, `PUT /profile/password`, `DELETE /profile`,
+`GET /public/menu` and `POST /public/orders` (customer QR ordering; no login required),
 `/customers`, `/menu-categories`, `/items`, `/orders` (+ `/orders/cart`, `/orders/:id/payment`),
 `/staff-members`, `/staff-shifts`, `/staff-assignments`, `/dashboard`, `/reports`.
 Lists me `?page=1&limit=10`, dropdowns ke liye `?all=true`.
+
+Landing page ka QR `/order` par available menu kholta hai. Customer menu mein sirf available items aate hain; production deployment par backend `CLIENT_URL` mein frontend origin aur frontend `VITE_API_URL` mein backend ka poora `/api` URL set karein.
 
 ## Dhyan rakho
 - Purana MySQL/SQLite data apne aap migrate nahi hota. Naya MongoDB khali start hota hai.

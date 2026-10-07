@@ -11,6 +11,7 @@ import * as orders from '../controllers/order.controller.js';
 import * as staff from '../controllers/staff.controller.js';
 import * as shifts from '../controllers/shift.controller.js';
 import * as assignment from '../controllers/assignment.controller.js';
+import * as publicOrders from '../controllers/publicOrder.controller.js';
 import { dashboard } from '../controllers/dashboard.controller.js';
 import { reports } from '../controllers/report.controller.js';
 import { home, search } from '../controllers/home.controller.js';
@@ -24,6 +25,8 @@ router.post('/auth/register', validate(v.registerSchema), auth.register);
 router.post('/auth/login', validate(v.loginSchema), auth.login);
 router.post('/auth/forgot-password', validate(v.forgotPasswordSchema), auth.forgotPassword);
 router.post('/auth/reset-password', validate(v.resetPasswordSchema), auth.resetPassword);
+router.get('/public/menu', publicOrders.menu);
+router.post('/public/orders', validate(v.publicOrderSchema), publicOrders.create);
 
 // ---------- yahan se neeche sab login ke baad ----------
 router.use(protect);

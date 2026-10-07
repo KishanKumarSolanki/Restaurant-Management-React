@@ -82,6 +82,23 @@ export const paymentSchema = z.object({
   paymentMethod: z.enum(['cash', 'online'], { errorMap: () => ({ message: 'Choose cash or online.' }) }),
 });
 
+// ---------- customer QR ordering (no staff login required) ----------
+export const publicOrderSchema = z.object({
+  customerName: text(),
+  phone: text(20),
+  tableNumber: optText(50),
+  notes: optText(500),
+  items: z
+    .array(
+      z.object({
+        item: text(50),
+        quantity: z.coerce.number({ invalid_type_error: 'Quantity must be a number.' }).int().min(1, 'Minimum 1.').max(50, 'Maximum 50.'),
+        itemNotes: optText(255),
+      })
+    )
+    .min(1, 'Add at least one item.'),
+});
+
 // ---------- staff ----------
 const staffBase = { name: text(), email, phone: optText(20), role: text(100), wage: optNumber(0, 99999.99), hireDate: optDate };
 
