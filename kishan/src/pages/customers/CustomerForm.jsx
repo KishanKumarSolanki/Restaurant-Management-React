@@ -17,9 +17,9 @@ export default function CustomerForm() {
   return (
     <>
       <PageHeader title={f.isEdit ? 'Edit Customer' : 'Add Customer'} crumbs={[{ label: 'Customers', to: '/customers' }, { label: f.isEdit ? 'Edit' : 'Create' }]} />
-      <div className="card"><div className="card-body">
+      <div className="card"><div className="card-body !p-4 sm:!p-5">
         <DataState loading={f.loading} error={f.loadError}>
-          <form onSubmit={f.submit} className="space-y-5">
+          <form onSubmit={f.submit} className="space-y-4 sm:space-y-5">
             <div className="grid gap-4 md:grid-cols-2">
               <Input label="Customer No" name="customerno" value={f.form.customerno} onChange={f.set} error={f.errors.customerno} />
               <Input label="Name" name="name" value={f.form.name} onChange={f.set} error={f.errors.name} />
@@ -29,9 +29,11 @@ export default function CustomerForm() {
             <Textarea label="Notes (allergies, favourite table...)" name="notes" value={f.form.notes} onChange={f.set} error={f.errors.notes} />
             <Textarea label="Preferences" name="preferences" value={f.form.preferences} onChange={f.set} error={f.errors.preferences} />
             <Textarea label="Feedback" name="feedback" value={f.form.feedback} onChange={f.set} error={f.errors.feedback} />
-            <div className="flex justify-between border-t border-gray-100 pt-4">
-              <Link to="/customers" className="btn btn-secondary"><ArrowLeft size={16} /> Cancel</Link>
-              <button className="btn btn-primary" disabled={f.busy}><Save size={16} /> {f.busy ? 'Saving...' : f.isEdit ? 'Update Customer' : 'Save Customer'}</button>
+
+            {/* mobile: buttons full-width, Save upar aur Cancel neeche; sm+ : left/right */}
+            <div className="flex flex-col-reverse gap-2 border-t border-gray-100 pt-4 sm:flex-row sm:justify-between sm:gap-3">
+              <Link to="/customers" className="btn btn-secondary w-full sm:w-auto"><ArrowLeft size={16} /> Cancel</Link>
+              <button className="btn btn-primary w-full sm:w-auto" disabled={f.busy}><Save size={16} /> {f.busy ? 'Saving...' : f.isEdit ? 'Update Customer' : 'Save Customer'}</button>
             </div>
           </form>
         </DataState>
