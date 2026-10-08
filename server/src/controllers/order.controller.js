@@ -8,6 +8,15 @@ import { paginate } from '../utils/paginate.js';
 import { nextSequence } from '../utils/counter.js';
 
 const POPULATE_STAFF = { path: 'assignedTo', select: 'name' };
+const GST_RATE = 5;
+
+const withGst = (prepared) => {
+  const gstAmount = Number((prepared.amount * GST_RATE / 100).toFixed(2));
+  return { ...prepared, gstRate: GST_RATE, gstAmount, grandTotal: Number((prepared.amount + gstAmount).toFixed(2)) };
+};
+
+const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[char]);
+const money = (value) => `Rs. ${Number(value || 0).toFixed(2)}`;
 
 const findOr404 = async (id) => {
   const order = mongoose.isValidObjectId(id) ? await Order.findById(id).populate(POPULATE_STAFF) : null;
@@ -69,7 +78,7 @@ export const create = asyncHandler(async (req, res) => {
   const { ordername, customerno, status, notes } = req.body;
   if (status === 'completed') throw new ApiError(422, 'Orders can only be completed after admin approval.');
   await assertCustomer(customerno);
-  const prepared = await prepareItems(req.body.items);
+  const prepared = withGst(await prepareItems(req.body.items));
   const seq = await nextSequence('bill');
 
   const order = await Order.create({
@@ -87,7 +96,7 @@ export const update = asyncHandler(async (req, res) => {
     throw new ApiError(422, 'Orders can only be completed after admin approval.');
   }
   await assertCustomer(customerno);
-  const prepared = await prepareItems(req.body.items);
+  const prepared = withGst(await prepareItems(req.body.items));
 
   order.set({ ordername, customerno, status, notes, ...prepared });
   await order.save();
@@ -108,6 +117,19 @@ export const approveCompletion = asyncHandler(async (req, res) => {
   order.approvedBy = req.user.id;
   await order.save();
   res.json({ order, message: `Order ${order.ordername} approved and completed.` });
+});
+
+// A portable HTML invoice downloads as a file and can be opened/printed as a bill.
+export const downloadInvoice = asyncHandler(async (req, res) => {
+  const order = await findOr404(req.params.id);
+  if (order.status !== 'completed') throw new ApiError(422, 'Invoice is available after the order is completed.');
+  const rate = order.gstRate ?? GST_RATE;
+  const gst = order.gstAmount ?? Number((order.amount * rate / 100).toFixed(2));
+  const total = order.grandTotal ?? Number((order.amount + gst).toFixed(2));
+  const rows = order.items.map((item) => `<tr><td>${escapeHtml(item.itemName)}</td><td>${item.quantity}</td><td>${money(item.unitPrice)}</td><td>${money(item.lineTotal)}</td></tr>`).join('');
+  const completedAt = order.approvedAt || order.updatedAt;
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Invoice ${escapeHtml(order.billNumber)}</title><style>body{font:14px Arial;color:#222;max-width:720px;margin:36px auto;padding:0 20px}h1{margin:0;color:#1f2937}table{width:100%;border-collapse:collapse;margin:24px 0}th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left}th:last-child,td:last-child{text-align:right}.totals{margin-left:auto;width:300px}.totals p{display:flex;justify-content:space-between;margin:8px 0}.grand{font-size:18px;font-weight:bold;border-top:2px solid #222;padding-top:10px}@media print{body{margin:0;max-width:none}}</style></head><body><h1>Cafe Express</h1><p><strong>Tax Invoice:</strong> ${escapeHtml(order.billNumber)}<br><strong>Order:</strong> ${escapeHtml(order.ordername)}<br><strong>Customer No:</strong> ${escapeHtml(order.customerno)}<br><strong>Completed:</strong> ${new Date(completedAt).toLocaleString('en-IN')}</p><table><thead><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead><tbody>${rows}</tbody></table><div class="totals"><p><span>Subtotal</span><span>${money(order.amount)}</span></p><p><span>GST (${rate}%)</span><span>${money(gst)}</span></p><p class="grand"><span>Grand Total</span><span>${money(total)}</span></p></div><p>Thank you for dining with us.</p></body></html>`;
+  res.set({ 'Content-Type': 'text/html; charset=utf-8', 'Content-Disposition': `attachment; filename="${order.billNumber || 'invoice'}.html"` }).send(html);
 });
 
 export const savePayment = asyncHandler(async (req, res) => {

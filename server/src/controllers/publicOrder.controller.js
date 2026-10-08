@@ -6,6 +6,8 @@ import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { nextSequence } from '../utils/counter.js';
 
+const GST_RATE = 5;
+
 export const menu = asyncHandler(async (_req, res) => {
   const items = await Item.find({ isAvailable: true }).sort({ category: 1, name: 1 });
   res.json({ data: items });
@@ -47,6 +49,7 @@ export const create = asyncHandler(async (req, res) => {
   }
 
   const prepared = await prepareItems(lines);
+  const gstAmount = Number((prepared.amount * GST_RATE / 100).toFixed(2));
   const seq = await nextSequence('bill');
   const order = await Order.create({
     ordername: tableNumber ? `QR order - Table ${tableNumber}` : `QR order - ${customerName}`,
@@ -55,6 +58,9 @@ export const create = asyncHandler(async (req, res) => {
     notes,
     billNumber: `BILL-${String(seq).padStart(6, '0')}`,
     ...prepared,
+    gstRate: GST_RATE,
+    gstAmount,
+    grandTotal: Number((prepared.amount + gstAmount).toFixed(2)),
   });
 
   res.status(201).json({ order, message: 'Your order has been sent to the restaurant.' });

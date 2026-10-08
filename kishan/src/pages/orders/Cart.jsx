@@ -37,7 +37,8 @@ function CartRow({ order, onSaved }) {
 
       <div className="order-2 text-right lg:order-none lg:col-span-2 lg:text-left">
         <p className="text-xs uppercase text-gray-500">Amount</p>
-        <p className="text-lg font-semibold lg:text-base">{money(order.amount)}</p>
+        <p className="text-lg font-semibold lg:text-base">{money(order.grandTotal ?? (order.amount + (order.gstAmount || 0)))}</p>
+        <p className="text-xs text-gray-500">GST {money(order.gstAmount || 0)}</p>
       </div>
 
       <div className="order-3 col-span-2 min-w-0 lg:order-none lg:col-span-4">

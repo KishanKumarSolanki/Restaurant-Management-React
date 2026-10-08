@@ -16,7 +16,12 @@ const orderSchema = new mongoose.Schema(
     billNumber: { type: String, default: null },
     customerno: { type: String, required: true, trim: true, index: true },
     quantity: { type: Number, required: true },
+    // `amount` is the food subtotal. GST values are stored as a snapshot so old bills
+    // do not change if the restaurant tax rate is changed later.
     amount: { type: Number, required: true },
+    gstRate: { type: Number, required: true, default: 5 },
+    gstAmount: { type: Number, required: true, default: 0 },
+    grandTotal: { type: Number, required: true },
     paymentMethod: { type: String, enum: ['cash', 'online', null], default: null },
     paymentStatus: { type: String, enum: ['pending', 'paid'], default: 'pending' },
     paidAt: { type: Date, default: null },

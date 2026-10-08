@@ -59,6 +59,7 @@ router.get('/orders/cart', orders.cart);
 router.get('/orders/cart/count', orders.cartCount);
 router.route('/orders').get(orders.list).post(validate(v.orderSchema), orders.create);
 router.patch('/orders/:id/approve', requireAdmin, orders.approveCompletion);
+router.get('/orders/:id/invoice', orders.downloadInvoice);
 router.patch('/orders/:id/payment', validate(v.paymentSchema), orders.savePayment);
 router.route('/orders/:id').get(orders.getOne).put(validate(v.orderSchema), orders.update).delete(orders.remove);
 

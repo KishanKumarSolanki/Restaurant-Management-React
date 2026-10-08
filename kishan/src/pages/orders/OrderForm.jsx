@@ -34,6 +34,7 @@ export default function OrderForm() {
 
   const totalQty = f.form.items.reduce((s, l) => s + (Number(l.quantity) || 0), 0);
   const totalAmt = f.form.items.reduce((s, l) => s + (Number(l.quantity) || 0) * priceOf(l.item), 0);
+  const gst = totalAmt * 0.05;
   const lineErr = (idx, key) => f.errors[`items.${idx}.${key}`];
 
   return (
@@ -55,7 +56,9 @@ export default function OrderForm() {
               <div className="rounded-xl bg-gray-50 p-4">
                 <p className="text-xs uppercase text-gray-500">Live Summary</p>
                 <div className="mt-2 flex justify-between font-semibold"><span>Total Quantity</span><span>{totalQty}</span></div>
-                <div className="mt-1 flex justify-between font-semibold"><span>Total Amount</span><span>{money(totalAmt)}</span></div>
+                <div className="mt-1 flex justify-between"><span>Subtotal</span><span>{money(totalAmt)}</span></div>
+                <div className="mt-1 flex justify-between"><span>GST (5%)</span><span>{money(gst)}</span></div>
+                <div className="mt-1 flex justify-between font-semibold"><span>Grand Total</span><span>{money(totalAmt + gst)}</span></div>
               </div>
             </div>
 

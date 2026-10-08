@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, ClipboardList, PlusCircle, Pencil, Trash2 } from 'lucide-react';
+import { CheckCircle2, ClipboardList, Download, PlusCircle, Pencil, Trash2 } from 'lucide-react';
 import PageHeader from '../../components/PageHeader.jsx';
 import Pagination from '../../components/Pagination.jsx';
 import ConfirmModal from '../../components/ConfirmModal.jsx';
@@ -10,7 +10,7 @@ import { useCrudList } from '../../hooks/useCrudList.js';
 import { useCart } from '../../context/CartContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
-import api, { errorMessage } from '../../api/client.js';
+import api, { downloadInvoice, errorMessage } from '../../api/client.js';
 import { money } from '../../utils/format.js';
 
 export default function OrderList() {
@@ -19,18 +19,33 @@ export default function OrderList() {
   const { user } = useAuth();
   const toast = useToast();
   const [approving, setApproving] = useState('');
+  const [downloading, setDownloading] = useState('');
   const isAdmin = user?.role?.toLowerCase() === 'admin';
 
   const approve = async (order) => {
     setApproving(order.id);
     try {
-      toast.success((await api.patch(`/orders/${order.id}/approve`)).data.message);
+      const { data } = await api.patch(`/orders/${order.id}/approve`);
       await l.reload();
       cart.refresh();
+      toast.success(data.message);
+      await downloadBill(data.order);
     } catch (error) {
       toast.error(errorMessage(error));
     } finally {
       setApproving('');
+    }
+  };
+
+  const downloadBill = async (order) => {
+    setDownloading(order.id);
+    try {
+      await downloadInvoice(order);
+      toast.success('Bill downloaded.');
+    } catch (error) {
+      toast.error(`Order is complete, but the bill could not be downloaded: ${errorMessage(error)}`);
+    } finally {
+      setDownloading('');
     }
   };
 
@@ -58,7 +73,7 @@ export default function OrderList() {
                           : <span className="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs">Unassigned</span>}</td>
                         <td><div className="font-medium">{o.items.length} items</div><div className="max-w-52 truncate text-xs text-gray-500">{o.items.slice(0, 2).map((x) => x.itemName).join(', ') || 'No line items'}</div></td>
                         <td>{o.quantity}</td>
-                        <td>{money(o.amount)}</td>
+                        <td><div>{money(o.grandTotal ?? (o.amount + (o.gstAmount || 0)))}</div><div className="text-xs text-gray-500">GST {money(o.gstAmount || 0)}</div></td>
                         <td><Badge value={o.fulfillmentStatus || 'preparing'} /></td>
                         <td><Badge value={o.status} /></td>
                         <td>
@@ -66,6 +81,11 @@ export default function OrderList() {
                             {isAdmin && o.fulfillmentStatus === 'served' && o.status !== 'completed' && (
                               <button className="btn btn-primary btn-sm" disabled={approving === o.id} onClick={() => approve(o)} title="Approve and complete order">
                                 <CheckCircle2 size={14} /> {approving === o.id ? 'Approving...' : 'Complete'}
+                              </button>
+                            )}
+                            {isAdmin && o.status === 'completed' && (
+                              <button className="btn btn-outline btn-sm" disabled={downloading === o.id} onClick={() => downloadBill(o)} title="Download bill">
+                                <Download size={14} /> {downloading === o.id ? 'Downloading...' : 'Bill'}
                               </button>
                             )}
                             <Link to={`/orders/${o.id}/edit`} className="icon-btn border-primary text-primary hover:bg-primary hover:text-white" title="Edit"><Pencil size={15} /></Link>

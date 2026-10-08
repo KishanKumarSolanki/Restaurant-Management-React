@@ -21,12 +21,12 @@ export const home = asyncHandler(async (req, res) => {
   const [todayAgg, activeOrders, unpaidAgg, recentOrders, topItems, weekAgg] = await Promise.all([
     Order.aggregate([
       { $match: { ...live, createdAt: { $gte: todayStart } } },
-      { $group: { _id: null, orders: { $sum: 1 }, sales: { $sum: '$amount' } } },
+      { $group: { _id: null, orders: { $sum: 1 }, sales: { $sum: { $ifNull: ['$grandTotal', '$amount'] } } } },
     ]),
     Order.countDocuments({ status: { $in: ['pending', 'processing'] } }),
     Order.aggregate([
       { $match: { ...live, paidAt: null } },
-      { $group: { _id: null, count: { $sum: 1 }, amount: { $sum: '$amount' } } },
+      { $group: { _id: null, count: { $sum: 1 }, amount: { $sum: { $ifNull: ['$grandTotal', '$amount'] } } } },
     ]),
     Order.find().sort({ createdAt: -1 }).limit(6).populate('assignedTo', 'name'),
     Order.aggregate([
@@ -42,7 +42,7 @@ export const home = asyncHandler(async (req, res) => {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: tzString(offsetMin) } },
           orders: { $sum: 1 },
-          sales: { $sum: '$amount' },
+          sales: { $sum: { $ifNull: ['$grandTotal', '$amount'] } },
         },
       },
     ]),
@@ -83,7 +83,7 @@ export const search = asyncHandler(async (req, res) => {
   const [customers, items, orders] = await Promise.all([
     Customer.find({ $or: [{ name: rx }, { customerno: rx }, { phone: rx }] }).limit(5).select('name customerno phone'),
     Item.find({ $or: [{ name: rx }, { category: rx }] }).limit(5).select('name price category isAvailable'),
-    Order.find({ $or: [{ ordername: rx }, { billNumber: rx }, { customerno: rx }] }).sort({ createdAt: -1 }).limit(5).select('ordername billNumber amount status'),
+    Order.find({ $or: [{ ordername: rx }, { billNumber: rx }, { customerno: rx }] }).sort({ createdAt: -1 }).limit(5).select('ordername billNumber amount grandTotal status'),
   ]);
   res.json({ customers, items, orders });
 });

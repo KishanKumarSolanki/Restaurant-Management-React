@@ -16,15 +16,15 @@ export default function StaffDashboard() {
   const toast = useToast();
   const [busyOrder, setBusyOrder] = useState('');
   const orders = data?.data || [];
-  const role = user?.role?.trim().toLowerCase();
-  const canMarkReady = ['cook', 'chef', 'kitchen'].includes(role);
-  const canMarkServed = ['waiter', 'server'].includes(role);
+  const role = String(user?.role || '').trim().toLowerCase();
+  const canMarkReady = /\b(cook|chef|kitchen)\b/.test(role);
+  const canMarkServed = /\b(waiter|server)\b/.test(role);
 
   const updateStatus = async (order, fulfillmentStatus) => {
     setBusyOrder(order.id);
     try {
       toast.success((await api.patch(`/staff/orders/${order.id}/fulfillment`, { fulfillmentStatus })).data.message);
-      reload();
+      await reload();
     } catch (err) {
       toast.error(errorMessage(err));
     } finally {

@@ -4,7 +4,7 @@ import PageHeader from '../../components/PageHeader.jsx';
 import DataState from '../../components/DataState.jsx';
 import Badge from '../../components/Badge.jsx';
 import { Select, Textarea } from '../../components/Field.jsx';
-import api, { errorMessage, fieldErrors } from '../../api/client.js';
+import api, { downloadInvoice, errorMessage, fieldErrors } from '../../api/client.js';
 import { useFetch } from '../../hooks/useFetch.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import { money, timeAgo } from '../../utils/format.js';
@@ -37,8 +37,15 @@ export default function AssignOrders() {
   const approve = async (order) => {
     setApproving(order.id);
     try {
-      toast.success((await api.patch(`/orders/${order.id}/approve`)).data.message);
-      reload();
+      const { data: completed } = await api.patch(`/orders/${order.id}/approve`);
+      await reload();
+      toast.success(completed.message);
+      try {
+        await downloadInvoice(completed.order);
+        toast.success('Bill downloaded.');
+      } catch (downloadError) {
+        toast.error(`Order is complete, but the bill could not be downloaded: ${errorMessage(downloadError)}`);
+      }
     } catch (err) {
       toast.error(errorMessage(err));
     } finally {
@@ -84,7 +91,7 @@ export default function AssignOrders() {
                           <tr key={o.id}>
                             <td className="font-medium">{o.ordername}</td>
                             <td>{o.customerno}</td>
-                            <td>{money(o.amount)}</td>
+                            <td>{money(o.grandTotal ?? (o.amount + (o.gstAmount || 0)))}</td>
                             <td><Badge value={o.status} /></td>
                             <td><Badge value={o.fulfillmentStatus || 'preparing'} /></td>
                             <td>{o.assignmentName
