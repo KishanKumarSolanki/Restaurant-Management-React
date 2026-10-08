@@ -14,6 +14,7 @@ const dd = 'flex items-center gap-2 px-4 py-2 hover:bg-gray-100';
 
 export default function Layout() {
   const { user, logout } = useAuth();
+  const isAdmin = user?.role?.trim().toLowerCase() === 'admin';
   const { count } = useCart();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -25,7 +26,7 @@ export default function Layout() {
     <div className="flex min-h-screen flex-col">
       <nav className="sticky top-0 z-40 bg-gradient-to-br from-ink to-[#3d3d3d] shadow-[0_2px_15px_rgba(0,0,0,0.1)]">
         <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
-          <Link to="/home" className="flex items-center gap-2 text-xl font-bold text-white"><Utensils size={22} /> Cafe Express</Link>
+          <Link to={isAdmin ? '/home' : '/staff/my-orders'} className="flex items-center gap-2 text-xl font-bold text-white"><Utensils size={22} /> Cafe Express</Link>
 
           <button className="cursor-pointer text-white lg:hidden" onClick={() => setOpen((o) => !o)} aria-label="Menu">{open ? <X /> : <MenuIcon />}</button>
 
@@ -34,30 +35,31 @@ export default function Layout() {
             onClick={(e) => e.target.closest('a') && setOpen(false)}
           >
             <div className="flex flex-col gap-1 lg:ml-6 lg:flex-row lg:items-center">
-              <NavLink to="/home" className={link}><Home size={16} /> Home</NavLink>
-              <NavLink to="/dashboard" className={link}><LayoutDashboard size={16} /> Dashboard</NavLink>
-              <NavLink to="/customers" className={link}><Users size={16} /> Customers</NavLink>
-              <Dropdown label="Menu" icon={Utensils} active={pathname.startsWith('/items') || pathname.startsWith('/menu-categories')}>
-                <Link to="/items" className={dd}><BookOpen size={15} /> Menu Items</Link>
-                <Link to="/menu-categories" className={dd}><Tags size={15} /> Categories</Link>
-              </Dropdown>
-              <NavLink to="/orders" className={link}><Receipt size={16} /> Orders</NavLink>
-              <NavLink to="/reports" className={link}><LineChart size={16} /> Reports</NavLink>
-              <Dropdown label="Staff" icon={UserCheck} active={pathname.startsWith('/staff')}>
-                <Link to="/staff/my-orders" className={dd}><ClipboardCheck size={15} /> My Assigned Orders</Link>
-                <Link to="/staff-members" className={dd}><Users size={15} /> Staff Members</Link>
-                <Link to="/staff-shifts" className={dd}><CalendarClock size={15} /> Shifts</Link>
-                <Link to="/staff/assign" className={dd}><ClipboardCheck size={15} /> Assign Orders</Link>
-              </Dropdown>
+              {isAdmin ? <>
+                <NavLink to="/home" className={link}><Home size={16} /> Home</NavLink>
+                <NavLink to="/dashboard" className={link}><LayoutDashboard size={16} /> Dashboard</NavLink>
+                <NavLink to="/customers" className={link}><Users size={16} /> Customers</NavLink>
+                <Dropdown label="Menu" icon={Utensils} active={pathname.startsWith('/items') || pathname.startsWith('/menu-categories')}>
+                  <Link to="/items" className={dd}><BookOpen size={15} /> Menu Items</Link>
+                  <Link to="/menu-categories" className={dd}><Tags size={15} /> Categories</Link>
+                </Dropdown>
+                <NavLink to="/orders" className={link}><Receipt size={16} /> Orders</NavLink>
+                <NavLink to="/reports" className={link}><LineChart size={16} /> Reports</NavLink>
+                <Dropdown label="Staff" icon={UserCheck} active={pathname.startsWith('/staff')}>
+                  <Link to="/staff-members" className={dd}><Users size={15} /> Staff Members</Link>
+                  <Link to="/staff-shifts" className={dd}><CalendarClock size={15} /> Shifts</Link>
+                  <Link to="/staff/assign" className={dd}><ClipboardCheck size={15} /> Assign Orders</Link>
+                </Dropdown>
+              </> : <NavLink to="/staff/my-orders" className={link}><ClipboardCheck size={16} /> Staff Dashboard</NavLink>}
             </div>
 
             <div className="mt-2 flex items-center gap-3 lg:mt-0">
-              <Link to="/cart" className="relative inline-flex items-center gap-2 rounded-full border border-white/70 px-3 py-1.5 text-sm text-white hover:bg-white hover:text-ink">
+              {isAdmin && <Link to="/cart" className="relative inline-flex items-center gap-2 rounded-full border border-white/70 px-3 py-1.5 text-sm text-white hover:bg-white hover:text-ink">
                 <ShoppingCart size={16} /> Cart
                 {count > 0 && (
                   <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-semibold text-white">{count}</span>
                 )}
-              </Link>
+              </Link>}
               <Dropdown label={user?.name} icon={UserCircle} align="right">
                 <Link to="/profile" className={dd}><UserCircle size={15} /> Profile</Link>
                 <button onClick={doLogout} className={`${dd} w-full cursor-pointer text-left`}><LogOut size={15} /> Log Out</button>

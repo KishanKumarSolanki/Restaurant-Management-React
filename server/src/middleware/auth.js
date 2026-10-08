@@ -22,7 +22,7 @@ export const protect = asyncHandler(async (req, _res, next) => {
 });
 
 export function requireAdmin(req, _res, next) {
-  if (req.user.role !== 'admin') return next(new ApiError(403, 'Only an admin can manage staff assignments and approve order completion.'));
+  if (req.user.role.trim().toLowerCase() !== 'admin') return next(new ApiError(403, 'Administrator access required.'));
   next();
 }
 

@@ -10,10 +10,29 @@ export function ProtectedRoute() {
   return <Outlet />;
 }
 
+export function AdminRoute() {
+  const { user } = useAuth();
+  if (user?.role?.trim().toLowerCase() !== 'admin') return <Navigate to="/staff/dashboard" replace />;
+  return <Outlet />;
+}
+
+export function StaffRoute() {
+  const { user } = useAuth();
+  if (user?.role?.trim().toLowerCase() === 'admin') return <Navigate to="/home" replace />;
+  return <Outlet />;
+}
+
+export function PublicRoute() {
+  const { user, loading } = useAuth();
+  if (loading) return <Spinner className="py-40" />;
+  if (user) return <Navigate to={user.role?.trim().toLowerCase() === 'admin' ? '/home' : '/staff/dashboard'} replace />;
+  return <Outlet />;
+}
+
 // login ho chuke user ko login/register nahi dikhana
 export function GuestRoute() {
   const { user, loading } = useAuth();
   if (loading) return <Spinner className="py-40" />;
-  if (user) return <Navigate to="/home" replace />;
+  if (user) return <Navigate to={user.role?.trim().toLowerCase() === 'admin' ? '/home' : '/staff/dashboard'} replace />;
   return <Outlet />;
 }

@@ -38,6 +38,8 @@ router.patch('/profile', validate(v.profileSchema), auth.updateProfile);
 router.put('/profile/password', validate(v.passwordUpdateSchema), auth.updatePassword);
 router.delete('/profile', validate(v.deleteAccountSchema), auth.deleteAccount);
 
+router.use(requireAdmin);
+
 router.get('/home', home);
 router.get('/search', search);
 router.get('/dashboard', dashboard);

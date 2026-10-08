@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
-import { GuestRoute, ProtectedRoute } from './components/RouteGuards.jsx';
+import { AdminRoute, GuestRoute, ProtectedRoute, PublicRoute, StaffRoute } from './components/RouteGuards.jsx';
 
 import Landing from './pages/Landing.jsx';
 import CustomerOrder from './pages/CustomerOrder.jsx';
@@ -27,13 +27,15 @@ import StaffForm from './pages/staff/StaffForm.jsx';
 import ShiftList from './pages/staff/ShiftList.jsx';
 import ShiftForm from './pages/staff/ShiftForm.jsx';
 import AssignOrders from './pages/staff/AssignOrders.jsx';
-import MyOrders from './pages/staff/MyOrders.jsx';
+import StaffDashboard from './pages/staff/dashboard/StaffDashboard.jsx';
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/order" element={<CustomerOrder />} />
+      <Route element={<PublicRoute />}>
+        <Route path="/" element={<Landing />} />
+        <Route path="/order" element={<CustomerOrder />} />
+      </Route>
 
       <Route element={<GuestRoute />}>
         <Route path="/login" element={<Login />} />
@@ -43,38 +45,43 @@ export default function App() {
       </Route>
 
       <Route element={<ProtectedRoute />}>
-        <Route element={<Layout />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/profile" element={<Profile />} />
+        <Route element={<StaffRoute />}>
+          <Route path="/staff/dashboard" element={<StaffDashboard />} />
+          <Route path="/staff/my-orders" element={<Navigate to="/staff/dashboard" replace />} />
+        </Route>
+        <Route element={<AdminRoute />}>
+          <Route element={<Layout />}>
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/reports" element={<Reports />} />
 
-          <Route path="/customers" element={<CustomerList />} />
-          <Route path="/customers/new" element={<CustomerForm />} />
-          <Route path="/customers/:id" element={<CustomerShow />} />
-          <Route path="/customers/:id/edit" element={<CustomerForm />} />
+            <Route path="/customers" element={<CustomerList />} />
+            <Route path="/customers/new" element={<CustomerForm />} />
+            <Route path="/customers/:id" element={<CustomerShow />} />
+            <Route path="/customers/:id/edit" element={<CustomerForm />} />
 
-          <Route path="/menu-categories" element={<CategoryList />} />
-          <Route path="/menu-categories/new" element={<CategoryForm />} />
-          <Route path="/menu-categories/:id/edit" element={<CategoryForm />} />
+            <Route path="/menu-categories" element={<CategoryList />} />
+            <Route path="/menu-categories/new" element={<CategoryForm />} />
+            <Route path="/menu-categories/:id/edit" element={<CategoryForm />} />
 
-          <Route path="/items" element={<ItemList />} />
-          <Route path="/items/new" element={<ItemForm />} />
-          <Route path="/items/:id/edit" element={<ItemForm />} />
+            <Route path="/items" element={<ItemList />} />
+            <Route path="/items/new" element={<ItemForm />} />
+            <Route path="/items/:id/edit" element={<ItemForm />} />
 
-          <Route path="/orders" element={<OrderList />} />
-          <Route path="/orders/new" element={<OrderForm />} />
-          <Route path="/orders/:id/edit" element={<OrderForm />} />
-          <Route path="/cart" element={<Cart />} />
+            <Route path="/orders" element={<OrderList />} />
+            <Route path="/orders/new" element={<OrderForm />} />
+            <Route path="/orders/:id/edit" element={<OrderForm />} />
+            <Route path="/cart" element={<Cart />} />
 
-          <Route path="/staff-members" element={<StaffList />} />
-          <Route path="/staff-members/new" element={<StaffForm />} />
-          <Route path="/staff-members/:id/edit" element={<StaffForm />} />
-          <Route path="/staff-shifts" element={<ShiftList />} />
-          <Route path="/staff-shifts/new" element={<ShiftForm />} />
-          <Route path="/staff-shifts/:id/edit" element={<ShiftForm />} />
-          <Route path="/staff/assign" element={<AssignOrders />} />
-          <Route path="/staff/my-orders" element={<MyOrders />} />
+            <Route path="/staff-members" element={<StaffList />} />
+            <Route path="/staff-members/new" element={<StaffForm />} />
+            <Route path="/staff-members/:id/edit" element={<StaffForm />} />
+            <Route path="/staff-shifts" element={<ShiftList />} />
+            <Route path="/staff-shifts/new" element={<ShiftForm />} />
+            <Route path="/staff-shifts/:id/edit" element={<ShiftForm />} />
+            <Route path="/staff/assign" element={<AssignOrders />} />
+          </Route>
         </Route>
       </Route>
 

@@ -43,6 +43,16 @@ export const updateFulfillment = asyncHandler(async (req, res) => {
   }
 
   const { fulfillmentStatus } = req.body;
+  const role = req.user.role.trim().toLowerCase();
+  const canMarkReady = ['cook', 'chef', 'kitchen'].includes(role);
+  const canMarkServed = ['waiter', 'server'].includes(role);
+
+  if (fulfillmentStatus === 'ready' && !canMarkReady) {
+    throw new ApiError(403, 'Only kitchen staff can mark an order ready.');
+  }
+  if (fulfillmentStatus === 'served' && !canMarkServed) {
+    throw new ApiError(403, 'Only waiters can mark an order served.');
+  }
   if (fulfillmentStatus === 'ready' && order.fulfillmentStatus !== 'preparing') {
     throw new ApiError(422, 'Only an order being prepared can be marked ready.');
   }

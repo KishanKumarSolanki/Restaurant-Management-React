@@ -11,7 +11,7 @@ export function CartProvider({ children }) {
   const [count, setCount] = useState(0);
 
   const refresh = useCallback(async () => {
-    if (!user) return setCount(0);
+    if (!user || user.role?.trim().toLowerCase() !== 'admin') return setCount(0);
     try {
       setCount((await api.get('/orders/cart/count')).data.count);
     } catch { /* ignore */ }
